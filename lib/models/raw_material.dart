@@ -1,15 +1,15 @@
 class RawMaterial {
   final int? id;
   final String name;
-  final double puchasePrice;
-  final double puchaseQuantity;
+  final double purchasePrice;
+  final double purchaseQuantity;
   final String unit;
 
   RawMaterial({
     this.id,
     required this.name,
-    required this.puchasePrice,
-    required this.puchaseQuantity,
+    required this.purchasePrice,
+    required this.purchaseQuantity,
     required this.unit,
   });
 
@@ -17,8 +17,8 @@ class RawMaterial {
     return {
       'id': id,
       'name': name,
-      'purchase_price': puchasePrice,
-      'puchase_quantity': puchaseQuantity,
+      'purchase_price': purchasePrice,
+      'puchase_quantity': purchaseQuantity,
       'unit': unit,
     };
   }
@@ -27,8 +27,8 @@ class RawMaterial {
     return RawMaterial(
       id: map['id'],
       name: map['name'],
-      puchasePrice: map['purchase_price'],
-      puchaseQuantity: map['purchase_quantity'],
+      purchasePrice: map['purchase_price'],
+      purchaseQuantity: map['purchase_quantity'],
       unit: map['unit'],
     );
   }
