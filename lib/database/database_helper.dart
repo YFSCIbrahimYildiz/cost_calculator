@@ -75,7 +75,7 @@ id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, profit_margin REAL NOT
     return await db.insert('products', product.toMap());
   }
 
-  Future<List<Product>> getAllProduct() async {
+  Future<List<Product>> getAllProducts() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('products');
     return List.generate(maps.length, (i) {
@@ -95,7 +95,7 @@ id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, profit_margin REAL NOT
 
   Future<int> deleteProduct(int id) async {
     final db = await database;
-    return db.delete('products', where: 'id=?', whereArgs: [id]);
+    return await db.delete('products', where: 'id=?', whereArgs: [id]);
   }
 
   //recipe
@@ -104,7 +104,7 @@ id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, profit_margin REAL NOT
     return await db.insert('recipes', recipe.toMap());
   }
 
-  Future<List<Recipe>> getAllRecipe() async {
+  Future<List<Recipe>> getAllRecipes() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('recipes');
     return List.generate(maps.length, (i) {
@@ -124,6 +124,6 @@ id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, profit_margin REAL NOT
 
   Future<int> deleteRecipe(int id) async {
     final db = await database;
-    return db.delete('recipes', where: 'id=?', whereArgs: [id]);
+    return await db.delete('recipes', where: 'id=?', whereArgs: [id]);
   }
 }
