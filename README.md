@@ -66,7 +66,7 @@ Hesaplama motoru arayüzden tamamen ayrıdır; bu sayede bağımsız test edileb
 
 ---
 
-## English Summary
+
 
 **Maliyet Hesabı** (*Cost Calculation*) is a cost and pricing calculator for small-to-medium manufacturers who produce a single product type — a furniture maker, a dairy producer, a soap workshop, and so on.
 
