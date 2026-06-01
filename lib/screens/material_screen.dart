@@ -186,7 +186,7 @@ class _MaterialScreenState extends State<MaterialScreen> {
                                               border: OutlineInputBorder(),
                                             ),
                                           ),
-                                          SizedBox(height: 12),
+                                          const SizedBox(height: 12),
                                           DropdownButtonFormField<String>(
                                             value: editSelectedUnit,
                                             decoration: const InputDecoration(
