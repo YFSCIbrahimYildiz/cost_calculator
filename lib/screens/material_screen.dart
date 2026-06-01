@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:maliyet_app/database/database_helper.dart';
 import 'package:maliyet_app/models/raw_material.dart';
 
@@ -44,6 +45,10 @@ class _MaterialScreenState extends State<MaterialScreen> {
 
             TextField(
               controller: priceController,
+              keyboardType: TextInputType.number,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+              ],
               decoration: const InputDecoration(
                 labelText: 'Alış Fiyatı',
                 border: OutlineInputBorder(),
@@ -52,6 +57,10 @@ class _MaterialScreenState extends State<MaterialScreen> {
             const SizedBox(height: 16),
             TextField(
               controller: quantityController,
+              keyboardType: TextInputType.number,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+              ],
               decoration: const InputDecoration(
                 labelText: 'Alış Miktarı',
                 //alt başlık ya da açıklama ekle
@@ -83,43 +92,180 @@ class _MaterialScreenState extends State<MaterialScreen> {
             Expanded(
               child: FutureBuilder<List<RawMaterial>>(
                 future: dbHelper.getAllMaterials(),
-                builder:
-                    (
-                      BuildContext context,
-                      AsyncSnapshot<List<RawMaterial>> snapshot,
-                    ) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      if (snapshot.hasError) {
-                        return Center(child: Text('Hata ${snapshot.error}'));
-                      }
-                      final materials = snapshot.data ?? [];
-                      if (materials.isEmpty) {
-                        return const Center(
-                          child: Text('Henüz hammadde eklenmedi'),
-                        );
-                      }
-                      return ListView.builder(
-                        itemCount: materials.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          final material = materials[index];
-                          return ListTile(
-                            title: Text(material.name),
-                            subtitle: Text(
-                              '${material.purchasePrice} ₺ / ${material.purchaseQuantity} ${material.unit}',
+                builder: (BuildContext context, AsyncSnapshot<List<RawMaterial>> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Hata ${snapshot.error}'));
+                  }
+                  final materials = snapshot.data ?? [];
+                  if (materials.isEmpty) {
+                    return const Center(
+                      child: Text('Henüz hammadde eklenmedi'),
+                    );
+                  }
+                  return ListView.builder(
+                    itemCount: materials.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final material = materials[index];
+                      return ListTile(
+                        title: Text(material.name),
+                        subtitle: Text(
+                          '${material.purchasePrice} ₺ / ${material.purchaseQuantity} ${material.unit}',
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              onPressed: () {
+                                final editNameController =
+                                    TextEditingController(text: material.name);
+                                final editPriceController =
+                                    TextEditingController(
+                                      text: material.purchasePrice.toString(),
+                                    );
+                                final editQuantityController =
+                                    TextEditingController(
+                                      text: material.purchaseQuantity
+                                          .toString(),
+                                    );
+                                String? editSelectedUnit = material.unit;
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  builder: (context) {
+                                    return Padding(
+                                      padding: EdgeInsets.only(
+                                        left: 16,
+                                        right: 16,
+                                        top: 16,
+                                        bottom:
+                                            MediaQuery.of(
+                                              context,
+                                            ).viewInsets.bottom +
+                                            16,
+                                      ),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Text('Hammadde Düzenle'),
+                                          const SizedBox(height: 12),
+                                          TextField(
+                                            controller: editNameController,
+                                            decoration: const InputDecoration(
+                                              labelText: 'Hammadde adı',
+                                              border: OutlineInputBorder(),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 12),
+                                          TextField(
+                                            controller: editPriceController,
+                                            keyboardType: TextInputType.number,
+                                            inputFormatters: [
+                                              FilteringTextInputFormatter.allow(
+                                                RegExp(r'[0-9.]'),
+                                              ),
+                                            ],
+                                            decoration: const InputDecoration(
+                                              labelText: 'Alış Fiyatı',
+                                              border: OutlineInputBorder(),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 12),
+                                          TextField(
+                                            controller: editQuantityController,
+                                            keyboardType: TextInputType.number,
+                                            inputFormatters: [
+                                              FilteringTextInputFormatter.allow(
+                                                RegExp(r'[0-9.]'),
+                                              ),
+                                            ],
+                                            decoration: const InputDecoration(
+                                              labelText: 'Alış Miktarı',
+                                              border: OutlineInputBorder(),
+                                            ),
+                                          ),
+                                          SizedBox(height: 12),
+                                          DropdownButtonFormField<String>(
+                                            value: editSelectedUnit,
+                                            decoration: const InputDecoration(
+                                              labelText: 'Birim',
+                                              border: OutlineInputBorder(),
+                                            ),
+                                            items: units.map((unit) {
+                                              return DropdownMenuItem<String>(
+                                                value: unit,
+                                                child: Text(unit),
+                                              );
+                                            }).toList(),
+                                            onChanged: (newValue) {
+                                              editSelectedUnit = newValue;
+                                            },
+                                          ),
+                                          const SizedBox(height: 12),
+                                          ElevatedButton(
+                                            onPressed: () async {
+                                              final name =
+                                                  editNameController.text;
+                                              final price = double.tryParse(
+                                                editPriceController.text,
+                                              );
+                                              final quantity = double.tryParse(
+                                                editQuantityController.text,
+                                              );
+                                              if (name.isEmpty ||
+                                                  price == null ||
+                                                  quantity == null ||
+                                                  editSelectedUnit == null) {
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                      'Lütfen tüm alanları doldurunuz.',
+                                                    ),
+                                                  ),
+                                                );
+                                                return;
+                                              }
+                                              final updateMaterial =
+                                                  RawMaterial(
+                                                    id: material.id,
+                                                    name: name,
+                                                    purchasePrice: price,
+                                                    purchaseQuantity: quantity,
+                                                    unit: editSelectedUnit!,
+                                                  );
+                                              await dbHelper.updateMaterial(
+                                                updateMaterial,
+                                              );
+                                              Navigator.pop(context);
+                                              setState(() {});
+                                            },
+                                            child: const Text('Güncelle'),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                              icon: Icon(Icons.edit),
                             ),
-                            trailing: IconButton(
+                            IconButton(
                               onPressed: () async {
                                 await dbHelper.deleteMaterial(material.id!);
                                 setState(() {});
                               },
                               icon: Icon(Icons.delete),
                             ),
-                          );
-                        },
+                          ],
+                        ),
                       );
                     },
+                  );
+                },
               ),
             ),
           ],
@@ -130,8 +276,18 @@ class _MaterialScreenState extends State<MaterialScreen> {
 
   Future<void> _saveMaterial() async {
     final name = nameController.text;
-    final price = double.parse(priceController.text);
-    final quantity = double.parse(quantityController.text);
+    final price = double.tryParse(priceController.text);
+    final quantity = double.tryParse(quantityController.text);
+
+    if (name.isEmpty ||
+        price == null ||
+        quantity == null ||
+        selectedUnit == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Lütfen tüm alanları doldurunuz')),
+      );
+      return;
+    }
 
     final material = RawMaterial(
       name: name,
