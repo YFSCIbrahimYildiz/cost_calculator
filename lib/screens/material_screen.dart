@@ -109,6 +109,13 @@ class _MaterialScreenState extends State<MaterialScreen> {
                             subtitle: Text(
                               '${material.purchasePrice} ₺ / ${material.purchaseQuantity} ${material.unit}',
                             ),
+                            trailing: IconButton(
+                              onPressed: () async {
+                                await dbHelper.deleteMaterial(material.id!);
+                                setState(() {});
+                              },
+                              icon: Icon(Icons.delete),
+                            ),
                           );
                         },
                       );
