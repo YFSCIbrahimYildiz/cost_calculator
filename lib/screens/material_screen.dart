@@ -255,8 +255,33 @@ class _MaterialScreenState extends State<MaterialScreen> {
                             ),
                             IconButton(
                               onPressed: () async {
-                                await dbHelper.deleteMaterial(material.id!);
-                                setState(() {});
+                                final confirm = await showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      title: const Text('Hammaddeyi Sil'),
+                                      content: const Text(
+                                        'Bu hammaddeyi silmek istediğinize emin misiniz',
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context, false),
+                                          child: Text('İptal'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context, true),
+                                          child: Text('Sil'),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                                if (confirm == true) {
+                                  await dbHelper.deleteMaterial(material.id!);
+                                  setState(() {});
+                                }
                               },
                               icon: Icon(Icons.delete),
                             ),
