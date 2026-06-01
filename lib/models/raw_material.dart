@@ -18,7 +18,7 @@ class RawMaterial {
       'id': id,
       'name': name,
       'purchase_price': purchasePrice,
-      'puchase_quantity': purchaseQuantity,
+      'purchase_quantity': purchaseQuantity,
       'unit': unit,
     };
   }
@@ -32,6 +32,4 @@ class RawMaterial {
       unit: map['unit'],
     );
   }
-
-  
 }
