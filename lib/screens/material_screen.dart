@@ -69,7 +69,7 @@ class _MaterialScreenState extends State<MaterialScreen> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: selectedUnit,
+              initialValue: selectedUnit,
               decoration: const InputDecoration(
                 labelText: 'Birim',
                 border: OutlineInputBorder(),
@@ -188,7 +188,7 @@ class _MaterialScreenState extends State<MaterialScreen> {
                                           ),
                                           const SizedBox(height: 12),
                                           DropdownButtonFormField<String>(
-                                            value: editSelectedUnit,
+                                            initialValue: editSelectedUnit,
                                             decoration: const InputDecoration(
                                               labelText: 'Birim',
                                               border: OutlineInputBorder(),

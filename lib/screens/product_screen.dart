@@ -63,9 +63,12 @@ class _ProductScreenState extends State<ProductScreen> {
     );
   }
 
-  bool _isValid() {
-    final name = nameController.text;
-    final profitMargin = double.parse(profitMarginController.text);
+  bool _isValid(
+    TextEditingController nameCtrl,
+    TextEditingController marginCtrl,
+  ) {
+    final name = nameCtrl.text;
+    final profitMargin = double.tryParse(marginCtrl.text);
 
     if (name.isEmpty || profitMargin == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -77,7 +80,7 @@ class _ProductScreenState extends State<ProductScreen> {
   }
 
   Future<void> _saveProduct() async {
-    if (!_isValid()) return;
+    if (!_isValid(nameController, profitMarginController)) return;
 
     final product = Product(
       name: nameController.text,
@@ -113,10 +116,13 @@ class _ProductScreenState extends State<ProductScreen> {
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  IconButton(onPressed: () {}, icon: Icon(Icons.edit)),
                   IconButton(
-                    onPressed: () => _deleteProduct,
-                    icon: Icon(Icons.delete),
+                    onPressed: () => _showEditModal(product),
+                    icon: const Icon(Icons.edit),
+                  ),
+                  IconButton(
+                    onPressed: () => _deleteProduct(product.id!),
+                    icon: const Icon(Icons.delete),
                   ),
                 ],
               ),
@@ -153,5 +159,67 @@ class _ProductScreenState extends State<ProductScreen> {
     }
   }
 
-  
+  void _showEditModal(Product product) {
+    final editNameController = TextEditingController(text: product.name);
+    final editMarginController = TextEditingController(
+      text: product.profitMargin.toString(),
+    );
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsetsGeometry.only(
+            left: 16,
+            right: 16,
+            top: 16,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 6,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text("Ürün Düzenle"),
+              const SizedBox(height: 12),
+              TextField(
+                controller: editNameController,
+                decoration: const InputDecoration(
+                  labelText: "Ürün Adı",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: editMarginController,
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                ],
+                decoration: InputDecoration(
+                  labelText: "Kar Marjı (%)",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: () async {
+                  if (!_isValid(editNameController, editMarginController))
+                    return;
+                  final updateProduct = Product(
+                    id: product.id,
+                    name: editNameController.text,
+                    profitMargin: double.tryParse(editMarginController.text)!,
+                  );
+                  Navigator.pop(context);
+                  await dbHelper.updateProduct(updateProduct);
+                  setState(() {});
+                },
+                child: const Text("Güncelle"),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
