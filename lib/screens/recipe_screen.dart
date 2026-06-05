@@ -4,6 +4,7 @@ import 'package:maliyet_app/database/database_helper.dart';
 import 'package:maliyet_app/models/product.dart';
 import 'package:maliyet_app/models/raw_material.dart';
 import 'package:maliyet_app/models/recipe.dart';
+import 'package:maliyet_app/models/recipe_details.dart';
 
 class RecipeScreen extends StatefulWidget {
   const RecipeScreen({super.key});
@@ -17,6 +18,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
   List<Product> products = [];
   Product? selectedProduct;
   List<RawMaterial> materials = [];
+  List<RecipeDetails> selectedRecipes = [];
   @override
   void initState() {
     super.initState();
@@ -49,10 +51,11 @@ class _RecipeScreenState extends State<RecipeScreen> {
                     hintText: "Ürün Seç",
                     enableFilter: true,
                     requestFocusOnTap: true,
-                    onSelected: (product) {
+                    onSelected: (product) async {
                       setState(() {
                         selectedProduct = product;
                       });
+                      await _loadRecipes();
                     },
                     dropdownMenuEntries: products.map((product) {
                       return DropdownMenuEntry<Product>(
@@ -70,6 +73,30 @@ class _RecipeScreenState extends State<RecipeScreen> {
                   child: const Text("Hammadde Ekle"),
                 ),
               ],
+            ),
+            const SizedBox(height: 16),
+            const Text("Seçilen Hammeddeler"),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 200,
+              child: selectedRecipes.isEmpty
+                  ? const Center(child: Text("Henüz Hammadde Eklenmedi"))
+                  : ListView.builder(
+                      itemCount: selectedRecipes.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final recipe = selectedRecipes[index];
+                        return ListTile(
+                          title: Text(recipe.materialName),
+                          subtitle: Text(
+                            "Miktar: ${recipe.quantity} • Fire: %${recipe.lossRate}",
+                          ),
+                          trailing: IconButton(
+                            onPressed: () => _deleteRecipe(recipe.id),
+                            icon: Icon(Icons.delete),
+                          ),
+                        );
+                      },
+                    ),
             ),
           ],
         ),
@@ -157,16 +184,28 @@ class _RecipeScreenState extends State<RecipeScreen> {
                     return;
                   }
 
+                  final alreadyExists = selectedRecipes.any(
+                    (recipe) => recipe.materialId == selectedMaterial!.id,
+                  );
+
+                  if (alreadyExists) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Bu hammadde eklenmiş")),
+                    );
+                    return;
+                  }
+
                   final saveRecipe = Recipe(
                     productId: selectedProduct!.id!,
                     materialId: selectedMaterial!.id!,
-                    quantity: double.tryParse(quantityController.text)!,
-                    lossRate: double.tryParse(lossRateController.text)!,
+                    quantity: quantity,
+                    lossRate: lossRate,
                   );
 
                   await dbHelper.insertRecipe(saveRecipe);
 
                   Navigator.pop(context);
+                  await _loadRecipes();
                   setState(() {});
                 },
                 child: const Text("Kaydet"),
@@ -176,5 +215,41 @@ class _RecipeScreenState extends State<RecipeScreen> {
         );
       },
     );
+  }
+
+  Future<void> _loadRecipes() async {
+    if (selectedProduct == null) return;
+    final data = await dbHelper.getInnerJoinRecipes(selectedProduct!.id!);
+    setState(() {
+      selectedRecipes = data;
+    });
+  }
+
+  Future<void> _deleteRecipe(int id) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Hammadde Sil"),
+          content: const Text(
+            "Bu hammadeyi reçeteden silmek istediğinize emin misiniz?",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text("İptal"),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text("Sil"),
+            ),
+          ],
+        );
+      },
+    );
+    if (confirm == true) {
+      await dbHelper.deleteRecipe(id);
+      await _loadRecipes();
+    }
   }
 }

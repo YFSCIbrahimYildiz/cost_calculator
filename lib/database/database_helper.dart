@@ -1,6 +1,7 @@
 import 'package:maliyet_app/models/product.dart';
 import 'package:maliyet_app/models/raw_material.dart';
 import 'package:maliyet_app/models/recipe.dart';
+import 'package:maliyet_app/models/recipe_details.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -125,5 +126,14 @@ id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, profit_margin REAL NOT
   Future<int> deleteRecipe(int id) async {
     final db = await database;
     return await db.delete('recipes', where: 'id=?', whereArgs: [id]);
+  }
+
+  Future<List<RecipeDetails>> getInnerJoinRecipes(int productId) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+      '''SELECT recipes.id,recipes.quantity,recipes.loss_rate,recipes.material_id,materials.name AS materialName FROM recipes INNER JOIN materials ON recipes.material_id=materials.id WHERE recipes.product_id=?''',
+      [productId],
+    );
+    return List.generate(maps.length, (i) => RecipeDetails.fromMap(maps[i]));
   }
 }
