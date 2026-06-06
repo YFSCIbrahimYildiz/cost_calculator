@@ -136,4 +136,12 @@ id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, profit_margin REAL NOT
     );
     return List.generate(maps.length, (i) => RecipeDetails.fromMap(maps[i]));
   }
+
+  Future<List<Map<String, dynamic>>> getAllRecipesWithDetails() async {
+    final db = await database;
+    final maps = await db.rawQuery(
+      '''SELECT products.id AS productId, products.name AS productName, recipes.id, recipes.material_id, recipes.quantity, recipes.loss_rate, materials.name AS materialName FROM recipes INNER JOIN materials ON recipes.material_id= materials.id INNER JOIN products ON recipes.product_id=products.id''',
+    );
+    return maps;
+  }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:maliyet_app/database/database_helper.dart';
 import 'package:maliyet_app/models/product.dart';
+import 'package:maliyet_app/models/product_with_recipes.dart';
 import 'package:maliyet_app/models/raw_material.dart';
 import 'package:maliyet_app/models/recipe.dart';
 import 'package:maliyet_app/models/recipe_details.dart';
@@ -19,6 +20,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
   Product? selectedProduct;
   List<RawMaterial> materials = [];
   List<RecipeDetails> selectedRecipes = [];
+  List<ProductWithRecipes> allRecipes = [];
   @override
   void initState() {
     super.initState();
@@ -28,9 +30,11 @@ class _RecipeScreenState extends State<RecipeScreen> {
   Future<void> _loadData() async {
     final productData = await dbHelper.getAllProducts();
     final materialData = await dbHelper.getAllMaterials();
+    final recipeRawData = await dbHelper.getAllRecipesWithDetails();
     setState(() {
       products = productData;
       materials = materialData;
+      allRecipes = _groupRecipes(recipeRawData);
     });
   }
 
@@ -93,6 +97,25 @@ class _RecipeScreenState extends State<RecipeScreen> {
                           trailing: IconButton(
                             onPressed: () => _deleteRecipe(recipe.id),
                             icon: Icon(Icons.delete),
+                          ),
+                        );
+                      },
+                    ),
+            ),
+            SizedBox(height: 24),
+            const Text("Reçete Listesi"),
+            const SizedBox(height: 8),
+            Expanded(
+              child: allRecipes.isEmpty
+                  ? const Center(child: Text("Henüz reçete yok"))
+                  : ListView.builder(
+                      itemCount: allRecipes.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final item = allRecipes[index];
+                        return Card(
+                          child: ListTile(
+                            title: Text(item.productName),
+                            subtitle: Text("${item.recipes.length} hammadde"),
                           ),
                         );
                       },
@@ -251,5 +274,24 @@ class _RecipeScreenState extends State<RecipeScreen> {
       await dbHelper.deleteRecipe(id);
       await _loadRecipes();
     }
+  }
+
+  List<ProductWithRecipes> _groupRecipes(List<Map<String, dynamic>> rawData) {
+    final Map<int, ProductWithRecipes> grouped = {};
+    for (final row in rawData) {
+      final productId = row['productId'] as int;
+      final recipeDetail = RecipeDetails.fromMap(row);
+
+      if (grouped.containsKey(productId)) {
+        grouped[productId]!.recipes.add(recipeDetail);
+      } else {
+        grouped[productId] = ProductWithRecipes(
+          productId: productId,
+          productName: row['productName'],
+          recipes: [recipeDetail],
+        );
+      }
+    }
+    return grouped.values.toList();
   }
 }
