@@ -21,6 +21,8 @@ class _RecipeScreenState extends State<RecipeScreen> {
   List<RawMaterial> materials = [];
   List<RecipeDetails> selectedRecipes = [];
   List<ProductWithRecipes> allRecipes = [];
+  final searchController = TextEditingController();
+  String searchQuery = "";
   @override
   void initState() {
     super.initState();
@@ -40,82 +42,107 @@ class _RecipeScreenState extends State<RecipeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final filtredRecipes = searchQuery.isEmpty
+        ? allRecipes
+        : allRecipes.where((item) {
+            return item.productName.toLowerCase().contains(
+              searchQuery.toLowerCase(),
+            );
+          }).toList();
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(title: const Text("Reçete")),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownMenu<Product>(
-                    width: double.infinity,
-                    hintText: "Ürün Seç",
-                    enableFilter: true,
-                    requestFocusOnTap: true,
-                    onSelected: (product) async {
-                      setState(() {
-                        selectedProduct = product;
-                      });
-                      await _loadRecipes();
-                    },
-                    dropdownMenuEntries: products.map((product) {
-                      return DropdownMenuEntry<Product>(
-                        value: product,
-                        label: product.name,
-                      );
-                    }).toList(),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: selectedProduct == null
-                      ? null
-                      : _showAddMaterialModal,
-                  child: const Text("Hammadde Ekle"),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            const Text("Seçilen Hammeddeler"),
-            const SizedBox(height: 8),
-            SizedBox(
-              height: 200,
-              child: selectedRecipes.isEmpty
-                  ? const Center(child: Text("Henüz Hammadde Eklenmedi"))
-                  : ListView.builder(
-                      itemCount: selectedRecipes.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        final recipe = selectedRecipes[index];
-                        return ListTile(
-                          title: Text(recipe.materialName),
-                          subtitle: Text(
-                            "Miktar: ${recipe.quantity} • Fire: %${recipe.lossRate}",
-                          ),
-                          trailing: IconButton(
-                            onPressed: () => _deleteRecipe(recipe.id),
-                            icon: Icon(Icons.delete),
-                          ),
-                        );
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: DropdownMenu<Product>(
+                      width: double.infinity,
+                      hintText: "Ürün Seç",
+                      enableFilter: true,
+                      requestFocusOnTap: true,
+                      onSelected: (product) async {
+                        setState(() {
+                          selectedProduct = product;
+                        });
+                        await _loadRecipes();
                       },
+                      dropdownMenuEntries: products.map((product) {
+                        return DropdownMenuEntry<Product>(
+                          value: product,
+                          label: product.name,
+                        );
+                      }).toList(),
                     ),
-            ),
-            SizedBox(height: 24),
-            const Text("Reçete Listesi"),
-            const SizedBox(height: 8),
-            Expanded(
-              child: allRecipes.isEmpty
-                  ? const Center(child: Text("Henüz reçete yok"))
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: selectedProduct == null
+                        ? null
+                        : _showAddMaterialModal,
+                    child: const Text("Hammadde Ekle"),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              const Text("Seçilen Hammeddeler"),
+              const SizedBox(height: 8),
+              SizedBox(
+                height: 200,
+                child: selectedRecipes.isEmpty
+                    ? const Center(child: Text("Henüz Hammadde Eklenmedi"))
+                    : ListView.builder(
+                        itemCount: selectedRecipes.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          final recipe = selectedRecipes[index];
+                          return ListTile(
+                            title: Text(recipe.materialName),
+                            subtitle: Text(
+                              "Miktar: ${recipe.quantity} • Fire: %${recipe.lossRate}",
+                            ),
+                            trailing: IconButton(
+                              onPressed: () => _deleteRecipe(recipe.id),
+                              icon: Icon(Icons.delete),
+                            ),
+                          );
+                        },
+                      ),
+              ),
+              SizedBox(height: 24),
+              const Text("Reçete Listesi"),
+              const SizedBox(height: 8),
+              TextField(
+                controller: searchController,
+                decoration: const InputDecoration(
+                  labelText: "Ürün Ara",
+                  prefixIcon: Icon(Icons.search),
+                  border: OutlineInputBorder(),
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    searchQuery = value;
+                  });
+                },
+              ),
+              const SizedBox(height: 8),
+
+              filtredRecipes.isEmpty
+                  ? const Center(child: Text("Ürün bulunamadı"))
                   : ListView.builder(
-                      itemCount: allRecipes.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        final item = allRecipes[index];
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: filtredRecipes.length,
+                      itemBuilder: (context, index) {
+                        final item = filtredRecipes[index];
                         return Card(
                           child: ListTile(
                             title: Text(item.productName),
-                            subtitle: Text("${item.recipes.length} hammadde"),
+                            subtitle: Text("${item.recipes.length} Hammadde"),
                             trailing: IconButton(
                               onPressed: () =>
                                   _deleteProductRecipe(item.productId),
@@ -126,8 +153,8 @@ class _RecipeScreenState extends State<RecipeScreen> {
                         );
                       },
                     ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -148,98 +175,101 @@ class _RecipeScreenState extends State<RecipeScreen> {
             top: 16,
             bottom: MediaQuery.of(context).viewInsets.bottom + 16,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text("Hammadde Ekle"),
-              const SizedBox(height: 12),
-              DropdownMenu<RawMaterial>(
-                width: double.infinity,
-                hintText: "Hammadde Seç",
-                enableFilter: true,
-                requestFocusOnTap: true,
-                onSelected: (material) {
-                  selectedMaterial = material;
-                },
-                dropdownMenuEntries: materials.map((material) {
-                  return DropdownMenuEntry(
-                    value: material,
-                    label: material.name,
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: quantityController,
-                keyboardType: TextInputType.number,
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                ],
-                decoration: const InputDecoration(
-                  labelText: "Kullanılan Miktar",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: lossRateController,
-                keyboardType: TextInputType.number,
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                ],
-                decoration: const InputDecoration(
-                  labelText: "Fire Oranı (%)",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () async {
-                  final quantity = double.tryParse(
-                    quantityController.text.trim(),
-                  );
-                  final lossRate = double.tryParse(
-                    lossRateController.text.trim(),
-                  );
-
-                  if (selectedMaterial == null ||
-                      quantity == null ||
-                      lossRate == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Lütfen tüm alanları doldurunuz"),
-                      ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text("Hammadde Ekle"),
+                const SizedBox(height: 12),
+                DropdownMenu<RawMaterial>(
+                  width: double.infinity,
+                  hintText: "Hammadde Seç",
+                  enableFilter: true,
+                  requestFocusOnTap: true,
+                  menuHeight: 200,
+                  onSelected: (material) {
+                    selectedMaterial = material;
+                  },
+                  dropdownMenuEntries: materials.map((material) {
+                    return DropdownMenuEntry(
+                      value: material,
+                      label: material.name,
                     );
-                    return;
-                  }
-
-                  final alreadyExists = selectedRecipes.any(
-                    (recipe) => recipe.materialId == selectedMaterial!.id,
-                  );
-
-                  if (alreadyExists) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Bu hammadde eklenmiş")),
+                  }).toList(),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: quantityController,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                  ],
+                  decoration: const InputDecoration(
+                    labelText: "Kullanılan Miktar",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: lossRateController,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                  ],
+                  decoration: const InputDecoration(
+                    labelText: "Fire Oranı (%)",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () async {
+                    final quantity = double.tryParse(
+                      quantityController.text.trim(),
                     );
-                    return;
-                  }
+                    final lossRate = double.tryParse(
+                      lossRateController.text.trim(),
+                    );
 
-                  final saveRecipe = Recipe(
-                    productId: selectedProduct!.id!,
-                    materialId: selectedMaterial!.id!,
-                    quantity: quantity,
-                    lossRate: lossRate,
-                  );
+                    if (selectedMaterial == null ||
+                        quantity == null ||
+                        lossRate == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Lütfen tüm alanları doldurunuz"),
+                        ),
+                      );
+                      return;
+                    }
 
-                  await dbHelper.insertRecipe(saveRecipe);
+                    final alreadyExists = selectedRecipes.any(
+                      (recipe) => recipe.materialId == selectedMaterial!.id,
+                    );
 
-                  Navigator.pop(context);
-                  await _loadRecipes();
-                  setState(() {});
-                },
-                child: const Text("Kaydet"),
-              ),
-            ],
+                    if (alreadyExists) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Bu hammadde eklenmiş")),
+                      );
+                      return;
+                    }
+
+                    final saveRecipe = Recipe(
+                      productId: selectedProduct!.id!,
+                      materialId: selectedMaterial!.id!,
+                      quantity: quantity,
+                      lossRate: lossRate,
+                    );
+
+                    await dbHelper.insertRecipe(saveRecipe);
+
+                    Navigator.pop(context);
+                    await _loadRecipes();
+                    await _loadData();
+                  },
+                  child: const Text("Kaydet"),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -369,3 +399,25 @@ class _RecipeScreenState extends State<RecipeScreen> {
     );
   }
 }
+// Expanded(
+//               child: allRecipes.isEmpty
+//                   ? const Center(child: Text("Henüz reçete yok"))
+//                   : ListView.builder(
+//                       itemCount: allRecipes.length,
+//                       itemBuilder: (BuildContext context, int index) {
+//                         final item = allRecipes[index];
+//                         return Card(
+//                           child: ListTile(
+//                             title: Text(item.productName),
+//                             subtitle: Text("${item.recipes.length} hammadde"),
+//                             trailing: IconButton(
+//                               onPressed: () =>
+//                                   _deleteProductRecipe(item.productId),
+//                               icon: Icon(Icons.delete),
+//                             ),
+//                             onTap: () => _showRecipeDetailModal(item),
+//                           ),
+//                         );
+//                       },
+//                     ),
+//             ),
