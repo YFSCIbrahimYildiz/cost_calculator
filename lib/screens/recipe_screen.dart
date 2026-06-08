@@ -116,6 +116,11 @@ class _RecipeScreenState extends State<RecipeScreen> {
                           child: ListTile(
                             title: Text(item.productName),
                             subtitle: Text("${item.recipes.length} hammadde"),
+                            trailing: IconButton(
+                              onPressed: () =>
+                                  _deleteProductRecipe(item.productId),
+                              icon: Icon(Icons.delete),
+                            ),
                           ),
                         );
                       },
@@ -293,5 +298,33 @@ class _RecipeScreenState extends State<RecipeScreen> {
       }
     }
     return grouped.values.toList();
+  }
+
+  Future<void> _deleteProductRecipe(int productId) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Reçeteyi Sil"),
+          content: const Text(
+            "Bu ürünün reçetecisini silmek istediğinize emin misiniz?",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text("İptal"),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text("Sil"),
+            ),
+          ],
+        );
+      },
+    );
+    if (confirm == true) {
+      await dbHelper.deleteRecipesByProduct(productId);
+      _loadData();
+    }
   }
 }

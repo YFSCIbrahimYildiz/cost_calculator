@@ -128,6 +128,15 @@ id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, profit_margin REAL NOT
     return await db.delete('recipes', where: 'id=?', whereArgs: [id]);
   }
 
+  Future<int> deleteRecipesByProduct(int productId) async {
+    final db = await database;
+    return await db.delete(
+      'recipes',
+      where: 'product_id=?',
+      whereArgs: [productId],
+    );
+  }
+
   Future<List<RecipeDetails>> getInnerJoinRecipes(int productId) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.rawQuery(

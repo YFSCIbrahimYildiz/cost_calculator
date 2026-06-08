@@ -143,11 +143,11 @@ class _ProductScreenState extends State<ProductScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text("İptal"),
+              child: const Text("İptal"),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child: Text("Sil"),
+              child: const Text("Sil"),
             ),
           ],
         );
