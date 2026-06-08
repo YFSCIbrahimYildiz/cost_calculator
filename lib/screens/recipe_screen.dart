@@ -121,6 +121,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
                                   _deleteProductRecipe(item.productId),
                               icon: Icon(Icons.delete),
                             ),
+                            onTap: () => _showRecipeDetailModal(item),
                           ),
                         );
                       },
@@ -326,5 +327,45 @@ class _RecipeScreenState extends State<RecipeScreen> {
       await dbHelper.deleteRecipesByProduct(productId);
       _loadData();
     }
+  }
+
+  void _showRecipeDetailModal(ProductWithRecipes item) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsetsGeometry.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                item.productName,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 300,
+                child: ListView.builder(
+                  itemCount: item.recipes.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final recipe = item.recipes[index];
+                    return ListTile(
+                      title: Text(recipe.materialName),
+                      subtitle: Text(
+                        "Miktar: ${recipe.quantity} • Fire: %${recipe.lossRate}",
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
