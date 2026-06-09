@@ -32,4 +32,13 @@ class RawMaterial {
       unit: map['unit'],
     );
   }
+  factory RawMaterial.fromJoinMap(Map<String, dynamic> map) {
+    return RawMaterial(
+      id: map['material_id'],
+      name: map['materialName'],
+      purchasePrice: map['purchase_price'],
+      purchaseQuantity: map['purchase_quantity'],
+      unit: '',
+    );
+  }
 }

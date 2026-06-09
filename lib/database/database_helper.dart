@@ -153,4 +153,33 @@ id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, profit_margin REAL NOT
     );
     return maps;
   }
+
+  Future<List<Recipe>> getRecipesByProductId(int productId) async {
+    final db = await database;
+    final maps = await db.query(
+      'recipes',
+      where: 'product_id=?',
+      whereArgs: [productId],
+    );
+    return List.generate(maps.length, (i) => Recipe.fromMap(maps[i]));
+  }
+
+  Future<List<Map<String, dynamic>>> getAllProductsWithRecipes() async {
+    final db = await database;
+    final maps = await db.rawQuery('''
+SELECT 
+products.id AS productId,
+products.name AS productName,
+products.profit_margin,
+recipes.id AS recipeId,
+recipes.material_id,
+recipes.quantity,
+recipes.loss_rate,
+materials.name AS materialName,
+materials.purchase_price,
+materials.purchase_quantity
+FROM products LEFT JOIN recipes ON products.id=recipes.product_id LEFT JOIN materials ON recipes.material_id=materials.id
+''');
+    return maps;
+  }
 }
