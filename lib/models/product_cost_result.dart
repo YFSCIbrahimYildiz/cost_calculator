@@ -1,5 +1,4 @@
 import 'package:maliyet_app/models/material_cost_line.dart';
-import 'package:maliyet_app/models/recipe_details.dart';
 
 class ProductCostResult {
   final String productName;
