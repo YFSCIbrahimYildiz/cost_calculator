@@ -17,4 +17,4 @@ class ProductCostResult {
     required this.profitMargin,
     required this.hasRecipe,
   });
-}
+} 
