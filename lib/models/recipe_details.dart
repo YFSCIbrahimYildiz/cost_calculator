@@ -22,4 +22,13 @@ class RecipeDetails {
       lossRate: (map['loss_rate'] as num).toDouble(),
     );
   }
+  factory RecipeDetails.fromJoinMap(Map<String, dynamic> map) {
+    return RecipeDetails(
+      id: map['recipeId'],
+      materialId: map['material_id'],
+      materialName: map['materialName'],
+      quantity: (map['quantity'] as num).toDouble(),
+      lossRate: (map['loss_rate'] as num).toDouble(),
+    );
+  }
 }

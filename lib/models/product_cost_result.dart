@@ -5,6 +5,7 @@ class ProductCostResult {
   final List<RecipeDetails> recipes;
   final double totalCost;
   final double salePrice;
+  final double profitMargin;
   final bool hasRecipe;
 
   ProductCostResult({
@@ -12,6 +13,7 @@ class ProductCostResult {
     required this.recipes,
     required this.totalCost,
     required this.salePrice,
+    required this.profitMargin,
     required this.hasRecipe,
   });
 }

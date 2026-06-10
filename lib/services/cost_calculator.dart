@@ -16,6 +16,7 @@ class CostCalculator {
     List<RawMaterial> materials,
     List<Recipe> recipes,
     Product product,
+    
   ) {
     double total = 0;
     for (var recipe in recipes) {

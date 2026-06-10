@@ -154,15 +154,15 @@ id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, profit_margin REAL NOT
     return maps;
   }
 
-  Future<List<Recipe>> getRecipesByProductId(int productId) async {
-    final db = await database;
-    final maps = await db.query(
-      'recipes',
-      where: 'product_id=?',
-      whereArgs: [productId],
-    );
-    return List.generate(maps.length, (i) => Recipe.fromMap(maps[i]));
-  }
+  // Future<List<Recipe>> getRecipesByProductId(int productId) async {
+  //   final db = await database;
+  //   final maps = await db.query(
+  //     'recipes',
+  //     where: 'product_id=?',
+  //     whereArgs: [productId],
+  //   );
+  //   return List.generate(maps.length, (i) => Recipe.fromMap(maps[i]));
+  // }
 
   Future<List<Map<String, dynamic>>> getAllProductsWithRecipes() async {
     final db = await database;
