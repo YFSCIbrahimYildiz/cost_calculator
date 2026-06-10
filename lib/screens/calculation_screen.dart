@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:maliyet_app/database/database_helper.dart';
+import 'package:maliyet_app/models/material_cost_line.dart';
 import 'package:maliyet_app/models/product.dart';
 import 'package:maliyet_app/models/product_cost_result.dart';
 import 'package:maliyet_app/models/raw_material.dart';
 import 'package:maliyet_app/models/recipe.dart';
-import 'package:maliyet_app/models/recipe_details.dart';
 import 'package:maliyet_app/services/cost_calculator.dart';
 
 class CalculationScreen extends StatefulWidget {
@@ -99,6 +99,9 @@ class _CalculationScreenState extends State<CalculationScreen> {
                                   "Maliyet ${item.totalCost.toStringAsFixed(2)} TL • Kâr %${item.profitMargin} • Satış: ${item.salePrice.toStringAsFixed(2)} TL",
                                 )
                               : const Text("Reçete yok"),
+                          onTap: item.hasRecipe
+                              ? () => _showCostDetailModal(item)
+                              : null,
                         ),
                       );
                     },
@@ -151,12 +154,25 @@ class _CalculationScreenState extends State<CalculationScreen> {
 
       final List<RawMaterial> materials = [];
       final List<Recipe> recipes = [];
-      final List<RecipeDetails> recipeDetailsList = [];
+      final List<MaterialCostLine> costLines = [];
 
       for (final row in rows) {
-        materials.add(RawMaterial.fromJoinMap(row));
-        recipes.add(Recipe.fromJoinMap(row));
-        recipeDetailsList.add(RecipeDetails.fromJoinMap(row));
+        final material = RawMaterial.fromJoinMap(row);
+        final recipe = Recipe.fromJoinMap(row);
+
+        materials.add(material);
+        recipes.add(recipe);
+
+        final lineCost = calculator.calculateMaterialCost(material, recipe);
+
+        costLines.add(
+          MaterialCostLine(
+            materialName: row['materialName'],
+            quantity: (row['quantity'] as num).toDouble(),
+            lossRate: (row['loss_rate'] as num).toDouble(),
+            cost: lineCost,
+          ),
+        );
       }
 
       final product = Product(
@@ -179,7 +195,7 @@ class _CalculationScreenState extends State<CalculationScreen> {
       resultList.add(
         ProductCostResult(
           productName: productName,
-          recipes: recipeDetailsList,
+          recipes: costLines,
           totalCost: totalCost,
           salePrice: salePrice,
           profitMargin: product.profitMargin,
@@ -197,5 +213,92 @@ class _CalculationScreenState extends State<CalculationScreen> {
     setState(() {
       result = calculated;
     });
+  }
+
+  void _showCostDetailModal(ProductCostResult item) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsetsGeometry.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                item.productName,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+
+              Row(
+                children: const [
+                  Expanded(
+                    flex: 3,
+                    child: Text(
+                      "Hammadde",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      "Miktar",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      "Kayıp",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      "Maliyet",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+              const Divider(),
+
+              ...item.recipes.map((line) {
+                return Padding(
+                  padding: const EdgeInsetsGeometry.symmetric(vertical: 4),
+                  child: Row(
+                    children: [
+                      Expanded(flex: 3, child: Text(line.materialName)),
+                      Expanded(flex: 2, child: Text(line.quantity.toString())),
+                      Expanded(
+                        flex: 2,
+                        child: Text("%${line.lossRate.toStringAsFixed(2)}"),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Text("${line.cost.toStringAsFixed(2)}"),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+              const Divider(),
+
+              const SizedBox(height: 8),
+              Text("Ürün Maliyeti: ${item.totalCost.toStringAsFixed(2)} TL"),
+              Text("Satış Fiyatı: ${item.salePrice.toStringAsFixed(2)} TL"),
+              Text("Kâr Oranı: ${item.profitMargin.toStringAsFixed(0)}"),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
