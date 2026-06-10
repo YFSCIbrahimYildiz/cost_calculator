@@ -81,6 +81,18 @@ class _ProductScreenState extends State<ProductScreen> {
 
   Future<void> _saveProduct() async {
     if (!_isValid(nameController, profitMarginController)) return;
+    final name = nameController.text.trim();
+    final existingProducts = await dbHelper.getAllProducts();
+    final alreadyexists = existingProducts.any(
+      (p) => p.name.toLowerCase() == name.toLowerCase(),
+    );
+    if (alreadyexists) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Bu isimde bir ürün zaten var")),
+      );
+      return;
+    }
 
     final product = Product(
       name: nameController.text,
@@ -205,6 +217,23 @@ class _ProductScreenState extends State<ProductScreen> {
                 onPressed: () async {
                   if (!_isValid(editNameController, editMarginController))
                     return;
+
+                  final name = editNameController.text.trim();
+                  final existingProducts = await dbHelper.getAllProducts();
+                  final alreadyExists = existingProducts.any(
+                    (p) =>
+                        p.name.toLowerCase() == name.toLowerCase() &&
+                        p.id != product.id,
+                  );
+                  if (alreadyExists) {
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Bu isimde başka bir ürün var"),
+                      ),
+                    );
+                    return;
+                  }
                   final updateProduct = Product(
                     id: product.id,
                     name: editNameController.text,

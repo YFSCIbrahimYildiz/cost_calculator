@@ -206,8 +206,9 @@ class _MaterialScreenState extends State<MaterialScreen> {
                                           const SizedBox(height: 12),
                                           ElevatedButton(
                                             onPressed: () async {
-                                              final name =
-                                                  editNameController.text;
+                                              final name = editNameController
+                                                  .text
+                                                  .trim();
                                               final price = double.tryParse(
                                                 editPriceController.text,
                                               );
@@ -229,6 +230,30 @@ class _MaterialScreenState extends State<MaterialScreen> {
                                                 );
                                                 return;
                                               }
+                                              final existingMaterials =
+                                                  await dbHelper
+                                                      .getAllMaterials();
+                                              final alreadyExists =
+                                                  existingMaterials.any(
+                                                    (m) =>
+                                                        m.name.toLowerCase() ==
+                                                            name.toLowerCase() &&
+                                                        m.id != material.id,
+                                                  );
+                                              if (alreadyExists) {
+                                                if (!mounted) return;
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                      "Bu isimde başka bir hammadde zaten var",
+                                                    ),
+                                                  ),
+                                                );
+                                                return;
+                                              }
+
                                               final updateMaterial =
                                                   RawMaterial(
                                                     id: material.id,
@@ -300,7 +325,7 @@ class _MaterialScreenState extends State<MaterialScreen> {
   }
 
   Future<void> _saveMaterial() async {
-    final name = nameController.text;
+    final name = nameController.text.trim();
     final price = double.tryParse(priceController.text);
     final quantity = double.tryParse(quantityController.text);
 
@@ -310,6 +335,17 @@ class _MaterialScreenState extends State<MaterialScreen> {
         selectedUnit == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Lütfen tüm alanları doldurunuz')),
+      );
+      return;
+    }
+    final existingMaterials = await dbHelper.getAllMaterials();
+    final alreadyExists = existingMaterials.any(
+      (m) => m.name.toLowerCase() == name.toLowerCase(),
+    );
+    if (alreadyExists) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Bu isimde hammadde zaten var")),
       );
       return;
     }
