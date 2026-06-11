@@ -23,6 +23,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
   List<ProductWithRecipes> allRecipes = [];
   final searchController = TextEditingController();
   String searchQuery = "";
+
   @override
   void initState() {
     super.initState();
@@ -58,6 +59,16 @@ class _RecipeScreenState extends State<RecipeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // --- ÜRÜN SEÇ + HAMMADDE EKLE ---
+              const Text(
+                "Reçete Oluştur",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1A3A5C),
+                ),
+              ),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   Expanded(
@@ -89,39 +100,94 @@ class _RecipeScreenState extends State<RecipeScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-              const Text("Seçilen Hammeddeler"),
+              const SizedBox(height: 20),
+              // --- SEÇİLEN HAMMADDELER ---
+              const Text(
+                "Seçilen Hammaddeler",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1A3A5C),
+                ),
+              ),
               const SizedBox(height: 8),
               SizedBox(
                 height: 200,
                 child: selectedRecipes.isEmpty
-                    ? const Center(child: Text("Henüz Hammadde Eklenmedi"))
+                    ? Center(
+                        child: Text(
+                          selectedProduct == null
+                              ? "Önce bir ürün seçin"
+                              : "Henüz hammadde eklenmedi",
+                          style: TextStyle(color: Colors.grey.shade600),
+                        ),
+                      )
                     : ListView.builder(
                         itemCount: selectedRecipes.length,
                         itemBuilder: (BuildContext context, int index) {
                           final recipe = selectedRecipes[index];
-                          return ListTile(
-                            title: Text(recipe.materialName),
-                            subtitle: Text(
-                              "Miktar: ${recipe.quantity} • Fire: %${recipe.lossRate}",
-                            ),
-                            trailing: IconButton(
-                              onPressed: () => _deleteRecipe(recipe.id),
-                              icon: Icon(Icons.delete),
+                          return Card(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 8,
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          recipe.materialName,
+                                          style: const TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600,
+                                            color: Color(0xFF1C2733),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          "Miktar: ${recipe.quantity} • Fire: %${recipe.lossRate.toStringAsFixed(0)}",
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: Colors.grey.shade600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  IconButton(
+                                    onPressed: () => _deleteRecipe(recipe.id),
+                                    icon: const Icon(Icons.delete_outline),
+                                    color: const Color(0xFFC0392B),
+                                    visualDensity: VisualDensity.compact,
+                                  ),
+                                ],
+                              ),
                             ),
                           );
                         },
                       ),
               ),
-              SizedBox(height: 24),
-              const Text("Reçete Listesi"),
+              const SizedBox(height: 24),
+              // --- REÇETE LİSTESİ ---
+              const Text(
+                "Reçete Listesi",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1A3A5C),
+                ),
+              ),
               const SizedBox(height: 8),
               TextField(
                 controller: searchController,
                 decoration: const InputDecoration(
                   labelText: "Ürün Ara",
                   prefixIcon: Icon(Icons.search),
-                  border: OutlineInputBorder(),
+                  isDense: true,
                 ),
                 onChanged: (value) {
                   setState(() {
@@ -129,10 +195,17 @@ class _RecipeScreenState extends State<RecipeScreen> {
                   });
                 },
               ),
-              const SizedBox(height: 8),
-
+              const SizedBox(height: 12),
               filtredRecipes.isEmpty
-                  ? const Center(child: Text("Ürün bulunamadı"))
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 24),
+                      child: Center(
+                        child: Text(
+                          "Ürün bulunamadı",
+                          style: TextStyle(color: Colors.grey.shade600),
+                        ),
+                      ),
+                    )
                   : ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
@@ -140,15 +213,65 @@ class _RecipeScreenState extends State<RecipeScreen> {
                       itemBuilder: (context, index) {
                         final item = filtredRecipes[index];
                         return Card(
-                          child: ListTile(
-                            title: Text(item.productName),
-                            subtitle: Text("${item.recipes.length} Hammadde"),
-                            trailing: IconButton(
-                              onPressed: () =>
-                                  _deleteProductRecipe(item.productId),
-                              icon: Icon(Icons.delete),
-                            ),
+                          child: InkWell(
                             onTap: () => _showRecipeDetailModal(item),
+                            borderRadius: BorderRadius.circular(12),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 10,
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: const Color(
+                                        0xFF1A3A5C,
+                                      ).withValues(alpha: 0.08),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: const Icon(
+                                      Icons.receipt_long,
+                                      color: Color(0xFF1A3A5C),
+                                      size: 22,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          item.productName,
+                                          style: const TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600,
+                                            color: Color(0xFF1C2733),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          "${item.recipes.length} hammadde",
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: Colors.grey.shade600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  IconButton(
+                                    onPressed: () =>
+                                        _deleteProductRecipe(item.productId),
+                                    icon: const Icon(Icons.delete_outline),
+                                    color: const Color(0xFFC0392B),
+                                    visualDensity: VisualDensity.compact,
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         );
                       },
@@ -169,7 +292,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
       isScrollControlled: true,
       builder: (context) {
         return Padding(
-          padding: EdgeInsetsGeometry.only(
+          padding: EdgeInsets.only(
             left: 16,
             right: 16,
             top: 16,
@@ -179,8 +302,26 @@ class _RecipeScreenState extends State<RecipeScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text("Hammadde Ekle"),
-                const SizedBox(height: 12),
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const Text(
+                  "Hammadde Ekle",
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1A3A5C),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 DropdownMenu<RawMaterial>(
                   width: double.infinity,
                   hintText: "Hammadde Seç",
@@ -206,7 +347,6 @@ class _RecipeScreenState extends State<RecipeScreen> {
                   ],
                   decoration: const InputDecoration(
                     labelText: "Kullanılan Miktar",
-                    border: OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -218,55 +358,58 @@ class _RecipeScreenState extends State<RecipeScreen> {
                   ],
                   decoration: const InputDecoration(
                     labelText: "Fire Oranı (%)",
-                    border: OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () async {
-                    final quantity = double.tryParse(
-                      quantityController.text.trim(),
-                    );
-                    final lossRate = double.tryParse(
-                      lossRateController.text.trim(),
-                    );
-
-                    if (selectedMaterial == null ||
-                        quantity == null ||
-                        lossRate == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Lütfen tüm alanları doldurunuz"),
-                        ),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      final quantity = double.tryParse(
+                        quantityController.text.trim(),
                       );
-                      return;
-                    }
-
-                    final alreadyExists = selectedRecipes.any(
-                      (recipe) => recipe.materialId == selectedMaterial!.id,
-                    );
-
-                    if (alreadyExists) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Bu hammadde eklenmiş")),
+                      final lossRate = double.tryParse(
+                        lossRateController.text.trim(),
                       );
-                      return;
-                    }
 
-                    final saveRecipe = Recipe(
-                      productId: selectedProduct!.id!,
-                      materialId: selectedMaterial!.id!,
-                      quantity: quantity,
-                      lossRate: lossRate,
-                    );
+                      if (selectedMaterial == null ||
+                          quantity == null ||
+                          lossRate == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Lütfen tüm alanları doldurunuz"),
+                          ),
+                        );
+                        return;
+                      }
 
-                    await dbHelper.insertRecipe(saveRecipe);
+                      final alreadyExists = selectedRecipes.any(
+                        (recipe) => recipe.materialId == selectedMaterial!.id,
+                      );
 
-                    Navigator.pop(context);
-                    await _loadRecipes();
-                    await _loadData();
-                  },
-                  child: const Text("Kaydet"),
+                      if (alreadyExists) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Bu hammadde eklenmiş")),
+                        );
+                        return;
+                      }
+
+                      final saveRecipe = Recipe(
+                        productId: selectedProduct!.id!,
+                        materialId: selectedMaterial!.id!,
+                        quantity: quantity,
+                        lossRate: lossRate,
+                      );
+
+                      await dbHelper.insertRecipe(saveRecipe);
+
+                      if (!mounted) return;
+                      Navigator.pop(context);
+                      await _loadRecipes();
+                      await _loadData();
+                    },
+                    child: const Text("Kaydet"),
+                  ),
                 ),
               ],
             ),
@@ -338,7 +481,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
         return AlertDialog(
           title: const Text("Reçeteyi Sil"),
           content: const Text(
-            "Bu ürünün reçetecisini silmek istediğinize emin misiniz?",
+            "Bu ürünün reçetesini silmek istediğinize emin misiniz?",
           ),
           actions: [
             TextButton(
@@ -365,28 +508,118 @@ class _RecipeScreenState extends State<RecipeScreen> {
       isScrollControlled: true,
       builder: (context) {
         return Padding(
-          padding: const EdgeInsetsGeometry.all(16),
+          padding: const EdgeInsets.all(16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
               Text(
                 item.productName,
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
+                  color: Color(0xFF1A3A5C),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1A3A5C).withValues(alpha: 0.06),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: const [
+                    Expanded(
+                      flex: 3,
+                      child: Text(
+                        "Hammadde",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        "Miktar",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        "Fire",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                        textAlign: TextAlign.end,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 4),
+              // Hammadde satırları
               SizedBox(
-                height: 300,
-                child: ListView.builder(
+                height: 280,
+                child: ListView.separated(
                   itemCount: item.recipes.length,
+                  separatorBuilder: (context, index) =>
+                      Divider(height: 1, color: Colors.grey.shade200),
                   itemBuilder: (BuildContext context, int index) {
                     final recipe = item.recipes[index];
-                    return ListTile(
-                      title: Text(recipe.materialName),
-                      subtitle: Text(
-                        "Miktar: ${recipe.quantity} • Fire: %${recipe.lossRate}",
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 10,
+                        horizontal: 8,
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            child: Text(
+                              recipe.materialName,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xFF1C2733),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              recipe.quantity.toString(),
+                              style: const TextStyle(fontSize: 14),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              "%${recipe.lossRate.toStringAsFixed(0)}",
+                              style: const TextStyle(fontSize: 14),
+                              textAlign: TextAlign.end,
+                            ),
+                          ),
+                        ],
                       ),
                     );
                   },
@@ -399,25 +632,3 @@ class _RecipeScreenState extends State<RecipeScreen> {
     );
   }
 }
-// Expanded(
-//               child: allRecipes.isEmpty
-//                   ? const Center(child: Text("Henüz reçete yok"))
-//                   : ListView.builder(
-//                       itemCount: allRecipes.length,
-//                       itemBuilder: (BuildContext context, int index) {
-//                         final item = allRecipes[index];
-//                         return Card(
-//                           child: ListTile(
-//                             title: Text(item.productName),
-//                             subtitle: Text("${item.recipes.length} hammadde"),
-//                             trailing: IconButton(
-//                               onPressed: () =>
-//                                   _deleteProductRecipe(item.productId),
-//                               icon: Icon(Icons.delete),
-//                             ),
-//                             onTap: () => _showRecipeDetailModal(item),
-//                           ),
-//                         );
-//                       },
-//                     ),
-//             ),
