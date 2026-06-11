@@ -29,7 +29,6 @@ class _CalculationScreenState extends State<CalculationScreen> {
   @override
   Widget build(BuildContext context) {
     final calculatedNumber = result.where((item) => item.hasRecipe).length;
-
     final filteredResults = result.where((item) {
       final recipeFilter = showOnlyNoRecipe ? !item.hasRecipe : true;
       final searchFilter = item.productName.toLowerCase().contains(
@@ -42,36 +41,33 @@ class _CalculationScreenState extends State<CalculationScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              children: [
-                Text(
-                  "Hesaplanan ürün: ${calculatedNumber}",
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    decoration: const InputDecoration(
-                      hintText: "Ürün ara",
-                      prefixIcon: Icon(Icons.search),
-                      border: OutlineInputBorder(),
-                      isDense: true,
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        searchQuery = value;
-                      });
-                    },
-                  ),
-                ),
-              ],
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+            child: TextField(
+              decoration: const InputDecoration(
+                hintText: "Ürün ara",
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(),
+                isDense: true,
+              ),
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value;
+                });
+              },
             ),
           ),
           Padding(
-            padding: const EdgeInsetsGeometry.symmetric(horizontal: 12),
+            padding: const EdgeInsetsGeometry.fromLTRB(12, 0, 12, 8),
             child: Row(
               children: [
+                Text(
+                  "Hesaplanan: $calculatedNumber",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+                const Spacer(),
                 const Text("Sadece reçetesizler"),
                 Switch(
                   value: showOnlyNoRecipe,
@@ -92,16 +88,129 @@ class _CalculationScreenState extends State<CalculationScreen> {
                     itemBuilder: (BuildContext context, int index) {
                       final item = filteredResults[index];
                       return Card(
-                        child: ListTile(
-                          title: Text(item.productName),
-                          subtitle: item.hasRecipe
-                              ? Text(
-                                  "Maliyet ${item.totalCost.toStringAsFixed(2)} TL • Kâr %${item.profitMargin} • Satış: ${item.salePrice.toStringAsFixed(2)} TL",
-                                )
-                              : const Text("Reçete yok"),
+                        child: InkWell(
                           onTap: item.hasRecipe
                               ? () => _showCostDetailModal(item)
                               : null,
+                          borderRadius: BorderRadius.circular(12),
+                          child: Padding(
+                            padding: const EdgeInsets.all(14),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        item.productName,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: Color(0xFF1C2733),
+                                        ),
+                                      ),
+                                    ),
+                                    if (!item.hasRecipe)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 3,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.shade200,
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          "Reçete yok",
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.grey.shade700,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                if (item.hasRecipe) ...[
+                                  const SizedBox(height: 10),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "Maliyet",
+                                              style: TextStyle(
+                                                fontSize: 11,
+                                                color: Colors.grey.shade600,
+                                              ),
+                                            ),
+                                            Text(
+                                              "${item.totalCost.toStringAsFixed(2)} ₺",
+                                              style: const TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w600,
+                                                color: Color(0xFF1C2733),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "Satış",
+                                              style: TextStyle(
+                                                fontSize: 11,
+                                                color: Colors.grey.shade600,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              "${item.salePrice.toStringAsFixed(2)} ₺",
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFFD98C0A),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: const Color(
+                                            0xFF1A3A5C,
+                                          ).withValues(alpha: 0.08),
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          "%${item.profitMargin.toStringAsFixed(0)}",
+                                          style: const TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                            color: Color(0xFF1A3A5C),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
                         ),
                       );
                     },
@@ -226,79 +335,259 @@ class _CalculationScreenState extends State<CalculationScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
               Text(
                 item.productName,
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
+                  color: Color(0xFF1A3A5C),
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
-
-              Row(
-                children: const [
-                  Expanded(
-                    flex: 3,
-                    child: Text(
-                      "Hammadde",
-                      style: TextStyle(fontWeight: FontWeight.bold),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8,
+                  horizontal: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1A3A5C).withValues(alpha: 0.06),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: const [
+                    Expanded(
+                      flex: 3,
+                      child: Text(
+                        "Hammadde",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      "Miktar",
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        "Miktar",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      "Kayıp",
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        "Kayıp",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      "Maliyet",
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    Expanded(
+                      flex: 3,
+                      child: Text(
+                        "Maliyet",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                        textAlign: TextAlign.end,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-              const Divider(),
+              const SizedBox(height: 4),
 
               ...item.recipes.map((line) {
                 return Padding(
-                  padding: const EdgeInsetsGeometry.symmetric(vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 4,
+                  ),
                   child: Row(
                     children: [
-                      Expanded(flex: 3, child: Text(line.materialName)),
-                      Expanded(flex: 2, child: Text(line.quantity.toString())),
                       Expanded(
-                        flex: 2,
-                        child: Text("%${line.lossRate.toStringAsFixed(2)}"),
+                        flex: 3,
+                        child: Text(
+                          line.materialName,
+                          style: const TextStyle(fontSize: 14),
+                        ),
                       ),
                       Expanded(
                         flex: 2,
-                        child: Text("${line.cost.toStringAsFixed(2)}"),
+                        child: Text(
+                          line.quantity.toString(),
+                          style: const TextStyle(fontSize: 14),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          "%${line.lossRate.toStringAsFixed(0)}",
+                          style: const TextStyle(fontSize: 14),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 3,
+                        child: Text(
+                          "${line.cost.toStringAsFixed(2)} ₺",
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          textAlign: TextAlign.end,
+                        ),
                       ),
                     ],
                   ),
                 );
               }),
-              const Divider(),
 
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F6F8),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Column(
+                  children: [
+                    _summaryRow(
+                      "Ürün Maliyeti",
+                      "${item.totalCost.toStringAsFixed(2)} ₺",
+                      const Color(0xFF1C2733),
+                    ),
+                    const SizedBox(height: 8),
+                    _summaryRow(
+                      "Kâr Oranı",
+                      "%${item.profitMargin.toStringAsFixed(0)}",
+                      const Color(0xFF1C2733),
+                    ),
+                    const Divider(height: 20),
+                    _summaryRow(
+                      "Satış Fiyatı",
+                      "${item.salePrice.toStringAsFixed(2)} ₺",
+                      const Color(0xFFD98C0A),
+                      isBig: true,
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 8),
-              Text("Ürün Maliyeti: ${item.totalCost.toStringAsFixed(2)} TL"),
-              Text("Satış Fiyatı: ${item.salePrice.toStringAsFixed(2)} TL"),
-              Text("Kâr Oranı: ${item.profitMargin.toStringAsFixed(0)}"),
             ],
           ),
         );
       },
     );
   }
+
+  Widget _summaryRow(
+    String label,
+    String value,
+    Color valueColor, {
+    bool isBig = false,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: isBig ? 15 : 14,
+            color: Colors.grey.shade700,
+            fontWeight: isBig ? FontWeight.w600 : FontWeight.normal,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: isBig ? 18 : 14,
+            fontWeight: isBig ? FontWeight.bold : FontWeight.w600,
+            color: valueColor,
+          ),
+        ),
+      ],
+    );
+  }
 }
+
+
+
+
+
+
+// ListTile(
+//                                   title: Text(item.productName),
+//                                   subtitle: item.hasRecipe
+//                                       ? Text(
+//                                           "Maliyet ${item.totalCost.toStringAsFixed(2)} TL • Kâr %${item.profitMargin} • Satış: ${item.salePrice.toStringAsFixed(2)} TL",
+//                                         )
+//                                       : const Text("Reçete yok"),
+                                  
+//                                 ),
+
+
+
+// Text(
+//                 item.productName,
+//                 style: const TextStyle(
+//                   fontSize: 18,
+//                   fontWeight: FontWeight.bold,
+//                 ),
+//                 textAlign: TextAlign.center,
+//               ),
+//               const SizedBox(height: 16),
+
+//               Row(
+//                 children: const [
+//                   Expanded(
+//                     flex: 3,
+//                     child: Text(
+//                       "Hammadde",
+//                       style: TextStyle(fontWeight: FontWeight.bold),
+//                     ),
+//                   ),
+//                   Expanded(
+//                     flex: 2,
+//                     child: Text(
+//                       "Miktar",
+//                       style: TextStyle(fontWeight: FontWeight.bold),
+//                     ),
+//                   ),
+//                   Expanded(
+//                     flex: 2,
+//                     child: Text(
+//                       "Kayıp",
+//                       style: TextStyle(fontWeight: FontWeight.bold),
+//                     ),
+//                   ),
+//                   Expanded(
+//                     flex: 2,
+//                     child: Text(
+//                       "Maliyet",
+//                       style: TextStyle(fontWeight: FontWeight.bold),
+//                     ),
+//                   ),
+//                 ],
+//               ),
+
+
