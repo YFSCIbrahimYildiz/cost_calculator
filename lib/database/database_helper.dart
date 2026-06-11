@@ -96,6 +96,7 @@ id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, profit_margin REAL NOT
 
   Future<int> deleteProduct(int id) async {
     final db = await database;
+    await deleteRecipesByProduct(id);
     return await db.delete('products', where: 'id=?', whereArgs: [id]);
   }
 
@@ -154,16 +155,6 @@ id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, profit_margin REAL NOT
     return maps;
   }
 
-  // Future<List<Recipe>> getRecipesByProductId(int productId) async {
-  //   final db = await database;
-  //   final maps = await db.query(
-  //     'recipes',
-  //     where: 'product_id=?',
-  //     whereArgs: [productId],
-  //   );
-  //   return List.generate(maps.length, (i) => Recipe.fromMap(maps[i]));
-  // }
-
   Future<List<Map<String, dynamic>>> getAllProductsWithRecipes() async {
     final db = await database;
     final maps = await db.rawQuery('''
@@ -181,5 +172,16 @@ materials.purchase_quantity
 FROM products LEFT JOIN recipes ON products.id=recipes.product_id LEFT JOIN materials ON recipes.material_id=materials.id
 ''');
     return maps;
+  }
+
+  Future<bool> isMaterialUsedRecipe(int materialId) async {
+    final db = await database;
+    final result = await db.query(
+      'recipes',
+      where: 'material_id=?',
+      whereArgs: [materialId],
+      limit: 1,
+    );
+    return result.isNotEmpty;
   }
 }

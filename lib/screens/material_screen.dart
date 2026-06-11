@@ -307,6 +307,7 @@ class _MaterialScreenState extends State<MaterialScreen> {
                                                                 name.toLowerCase() &&
                                                             m.id != material.id,
                                                       );
+
                                                   if (alreadyExists) {
                                                     if (!mounted) return;
                                                     ScaffoldMessenger.of(
@@ -352,6 +353,19 @@ class _MaterialScreenState extends State<MaterialScreen> {
                               ),
                               IconButton(
                                 onPressed: () async {
+                                  final isUsed = await dbHelper
+                                      .isMaterialUsedRecipe(material.id!);
+                                  if (isUsed) {
+                                    if (!mounted) return;
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          "Bu hammadde bir reçetede kullanılıyor. Önce reçeteden çıkarın",
+                                        ),
+                                      ),
+                                    );
+                                    return;
+                                  }
                                   final confirm = await showDialog(
                                     context: context,
                                     builder: (context) {
