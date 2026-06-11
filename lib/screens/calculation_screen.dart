@@ -357,10 +357,7 @@ class _CalculationScreenState extends State<CalculationScreen> {
               ),
               const SizedBox(height: 16),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 8,
-                  horizontal: 8,
-                ),
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
                 decoration: BoxDecoration(
                   color: const Color(0xFF1A3A5C).withValues(alpha: 0.06),
                   borderRadius: BorderRadius.circular(8),
@@ -529,65 +526,3 @@ class _CalculationScreenState extends State<CalculationScreen> {
     );
   }
 }
-
-
-
-
-
-
-// ListTile(
-//                                   title: Text(item.productName),
-//                                   subtitle: item.hasRecipe
-//                                       ? Text(
-//                                           "Maliyet ${item.totalCost.toStringAsFixed(2)} TL • Kâr %${item.profitMargin} • Satış: ${item.salePrice.toStringAsFixed(2)} TL",
-//                                         )
-//                                       : const Text("Reçete yok"),
-                                  
-//                                 ),
-
-
-
-// Text(
-//                 item.productName,
-//                 style: const TextStyle(
-//                   fontSize: 18,
-//                   fontWeight: FontWeight.bold,
-//                 ),
-//                 textAlign: TextAlign.center,
-//               ),
-//               const SizedBox(height: 16),
-
-//               Row(
-//                 children: const [
-//                   Expanded(
-//                     flex: 3,
-//                     child: Text(
-//                       "Hammadde",
-//                       style: TextStyle(fontWeight: FontWeight.bold),
-//                     ),
-//                   ),
-//                   Expanded(
-//                     flex: 2,
-//                     child: Text(
-//                       "Miktar",
-//                       style: TextStyle(fontWeight: FontWeight.bold),
-//                     ),
-//                   ),
-//                   Expanded(
-//                     flex: 2,
-//                     child: Text(
-//                       "Kayıp",
-//                       style: TextStyle(fontWeight: FontWeight.bold),
-//                     ),
-//                   ),
-//                   Expanded(
-//                     flex: 2,
-//                     child: Text(
-//                       "Maliyet",
-//                       style: TextStyle(fontWeight: FontWeight.bold),
-//                     ),
-//                   ),
-//                 ],
-//               ),
-
-

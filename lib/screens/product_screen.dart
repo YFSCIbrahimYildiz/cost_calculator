@@ -22,10 +22,27 @@ class _ProductScreenState extends State<ProductScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const Text(
+              "Yeni Ürün Ekle",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1A3A5C),
+              ),
+            ),
+            const SizedBox(height: 12),
             _buildForm(),
-            const SizedBox(height: 16),
-            const Text("Kayıtlı Ürünler"),
+            const SizedBox(height: 20),
+            const Text(
+              "Kayıtlı Ürünler",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1A3A5C),
+              ),
+            ),
             const SizedBox(height: 8),
             Expanded(child: _buildList()),
           ],
@@ -40,10 +57,7 @@ class _ProductScreenState extends State<ProductScreen> {
       children: [
         TextField(
           controller: nameController,
-          decoration: const InputDecoration(
-            labelText: "Ürün Adı",
-            border: OutlineInputBorder(),
-          ),
+          decoration: const InputDecoration(labelText: "Ürün Adı"),
         ),
         const SizedBox(height: 12),
         TextField(
@@ -52,10 +66,7 @@ class _ProductScreenState extends State<ProductScreen> {
           inputFormatters: [
             FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
           ],
-          decoration: InputDecoration(
-            labelText: "Kar Marjı (%)",
-            border: OutlineInputBorder(),
-          ),
+          decoration: InputDecoration(labelText: "Kar Marjı (%)"),
         ),
         const SizedBox(height: 12),
         ElevatedButton(onPressed: _saveProduct, child: const Text("Ekle")),
@@ -119,24 +130,69 @@ class _ProductScreenState extends State<ProductScreen> {
           return const Center(child: Text("Henüz ürün eklenmedi"));
         }
         return ListView.builder(
+          // ← ListView GERİ
           itemCount: products.length,
           itemBuilder: (BuildContext context, int index) {
+            // ← itemBuilder GERİ
             final product = products[index];
-            return ListTile(
-              title: Text(product.name),
-              subtitle: Text("Kar marjı: %${product.profitMargin}"),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    onPressed: () => _showEditModal(product),
-                    icon: const Icon(Icons.edit),
-                  ),
-                  IconButton(
-                    onPressed: () => _deleteProduct(product.id!),
-                    icon: const Icon(Icons.delete),
-                  ),
-                ],
+            return Card(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1A3A5C).withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.production_quantity_limits,
+                        color: Color(0xFF1A3A5C),
+                        size: 22,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            product.name,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF1C2733),
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            "Kâr marjı: %${product.profitMargin.toStringAsFixed(0)}",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => _showEditModal(product),
+                      icon: const Icon(Icons.edit_outlined),
+                      color: const Color(0xFF2E5A87),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    IconButton(
+                      onPressed: () => _deleteProduct(product.id!),
+                      icon: const Icon(Icons.delete_outline),
+                      color: const Color(0xFFC0392B),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ],
+                ),
               ),
             );
           },
@@ -191,14 +247,22 @@ class _ProductScreenState extends State<ProductScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
               const Text("Ürün Düzenle"),
               const SizedBox(height: 12),
               TextField(
                 controller: editNameController,
-                decoration: const InputDecoration(
-                  labelText: "Ürün Adı",
-                  border: OutlineInputBorder(),
-                ),
+                decoration: const InputDecoration(labelText: "Ürün Adı"),
               ),
               const SizedBox(height: 12),
               TextField(
@@ -207,10 +271,7 @@ class _ProductScreenState extends State<ProductScreen> {
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                 ],
-                decoration: InputDecoration(
-                  labelText: "Kar Marjı (%)",
-                  border: OutlineInputBorder(),
-                ),
+                decoration: InputDecoration(labelText: "Kar Marjı (%)"),
               ),
               const SizedBox(height: 12),
               ElevatedButton(
