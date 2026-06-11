@@ -1,4 +1,4 @@
-package com.example.maliyet_app
+package com.yildizfirsat.maliyethesabi
 
 import io.flutter.embedding.android.FlutterActivity
 
