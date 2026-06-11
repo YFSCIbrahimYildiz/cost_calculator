@@ -10,58 +10,106 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Maliyet Hesabı')),
+      appBar: AppBar(title: const Text("Maliyet Hesabı")),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const MaterialScreen(),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.inventory_2),
-              label: const Text('Hammaddeler'),
+            const SizedBox(height: 8),
+            const Text(
+              "Hoş Geldiniz",
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1A3A5C),
+              ),
             ),
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ProductScreen(),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.production_quantity_limits),
-              label: const Text('Ürünler'),
+            const SizedBox(height: 4),
+            Text(
+              "Maliyet ve satış fiyatlarınızı kolayca hesaplayın",
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
             ),
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const RecipeScreen()),
-                );
-              },
-              icon: Icon(Icons.receipt_long),
-              label: Text('Reçete'),
-            ),
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const CalculationScreen(),
+            const SizedBox(height: 28),
+            Expanded(
+              child: GridView.count(
+                crossAxisSpacing: 14,
+                mainAxisSpacing: 14,
+                crossAxisCount: 2,
+                children: [
+                  _menuCard(
+                    context,
+                    icon: Icons.inventory_2,
+                    label: "Hammaddeler",
+                    screen: const MaterialScreen(),
                   ),
-                );
-              },
-              icon: Icon(Icons.calculate_rounded),
-              label: Text('Hesapla'),
+                  _menuCard(
+                    context,
+                    icon: Icons.production_quantity_limits,
+                    label: "Ürünler",
+                    screen: const ProductScreen(),
+                  ),
+                  _menuCard(
+                    context,
+                    icon: Icons.receipt_long,
+                    label: "Reçete",
+                    screen: const RecipeScreen(),
+                  ),
+                  _menuCard(
+                    context,
+                    icon: Icons.calculate_rounded,
+                    label: "Hesapla",
+                    screen: const CalculationScreen(),
+                  ),
+                ],
+              ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _menuCard(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required Widget screen,
+  }) {
+    return Card(
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => screen),
+          );
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1A3A5C).withValues(alpha: 0.08),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, size: 32, color: const Color(0xFF1A3A5C)),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1C2733),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );
